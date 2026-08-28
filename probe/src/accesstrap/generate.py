@@ -22,6 +22,27 @@ class Sample:
     tokens: list[str]
     entropies: list[float]
 
+    def to_dict(self) -> dict:
+        return {
+            "item_id": self.item_id,
+            "condition": self.condition,
+            "sample_idx": self.sample_idx,
+            "text": self.text,
+            "tokens": self.tokens,
+            "entropies": self.entropies,
+        }
+
+    @classmethod
+    def from_dict(cls, rec: dict) -> Sample:
+        return cls(
+            item_id=rec["item_id"],
+            condition=rec["condition"],
+            sample_idx=int(rec["sample_idx"]),
+            text=rec["text"],
+            tokens=list(rec["tokens"]),
+            entropies=[float(x) for x in rec["entropies"]],
+        )
+
 
 def access_block(item: ProbeItem, condition: str) -> str | None:
     if condition == "A":

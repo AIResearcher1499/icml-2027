@@ -8,7 +8,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from accesstrap.aggregate import aggregate
-from accesstrap.data import load_items
+from accesstrap.checkpoint import (
+    ITEMS_NAME,
+    PROGRESS_NAME,
+    SAMPLES_NAME,
+    append_sample,
+    load_samples,
+    sample_key,
+    truncate_torn_tail,
+    write_progress,
+)
+from accesstrap.data import ProbeItem, load_items
 from accesstrap.generate import CONDITIONS, HFGenerator, dummy_sample
 
 
@@ -26,7 +36,17 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--max-new-tokens", type=int, default=512)
     p.add_argument("--temperature", type=float, default=0.7)
-    p.add_argument("--out", type=Path, default=None)
+    p.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="run directory; if samples.jsonl exists, skip finished keys and append",
+    )
+    p.add_argument(
+        "--fresh",
+        action="store_true",
+        help="ignore existing samples.jsonl in --out and start a new log (renames old file)",
+    )
 
     v = sub.add_parser("verdict", help="recompute verdict from a saved summary.json")
     v.add_argument("summary", type=Path)
@@ -49,53 +69,82 @@ def run_probe(args: argparse.Namespace) -> int:
         args.n_qa = min(args.n_qa, 2)
         args.n_samples = min(args.n_samples, 8)
 
-    items = load_items(n_math=args.n_math, n_qa=args.n_qa, dummy=dummy)
-    gen = None if dummy else HFGenerator(args.model, args.max_new_tokens, args.temperature)
+    out_dir = args.out or _default_out(dummy=dummy, smoke=args.smoke)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    samples_path = out_dir / SAMPLES_NAME
+    items_path = out_dir / ITEMS_NAME
 
-    samples = []
+    if args.fresh and samples_path.exists():
+        bak = samples_path.with_suffix(samples_path.suffix + ".bak")
+        samples_path.replace(bak)
+        print(f"--fresh: moved old log to {bak}", flush=True)
+
+    items = _load_or_create_items(items_path, args, dummy)
+    truncate_torn_tail(samples_path)
+    existing, done_keys = load_samples(samples_path)
     total = len(items) * len(CONDITIONS) * args.n_samples
-    done = 0
+    remaining = total - len(done_keys)
+    print(
+        f"run dir {out_dir} checkpointed={len(done_keys)} remaining={remaining} total={total}",
+        flush=True,
+    )
+
+    gen = None
+    if remaining > 0 and not dummy:
+        gen = HFGenerator(args.model, args.max_new_tokens, args.temperature)
+
+    n_new = 0
     for item in items:
         for cond in CONDITIONS:
             for i in range(args.n_samples):
+                key = sample_key(item.item_id, cond, i)
+                if key in done_keys:
+                    continue
                 if dummy:
                     s = dummy_sample(item, cond, i)
                 else:
                     s = gen.sample(item, cond, i, args.seed)
-                samples.append(s)
-                done += 1
-                if done % 10 == 0 or done == total:
-                    print(f"[{done}/{total}] {item.item_id} {cond}#{i}", flush=True)
+                append_sample(samples_path, s)
+                done_keys.add(key)
+                existing.append(s)
+                n_new += 1
+                done_n = len(done_keys)
+                write_progress(
+                    out_dir / PROGRESS_NAME,
+                    done=done_n,
+                    total=total,
+                    last=f"{item.item_id} {cond}#{i}",
+                )
+                if n_new % 10 == 0 or done_n == total:
+                    print(f"[{done_n}/{total}] {item.item_id} {cond}#{i}", flush=True)
 
+    samples, _ = load_samples(samples_path)
     blob = aggregate(items, samples, args.n_samples)
-    out_dir = args.out or _default_out(dummy=dummy, smoke=args.smoke)
-    out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "summary.json").write_text(json.dumps(blob["summary"], indent=2) + "\n")
-    (out_dir / "items.json").write_text(json.dumps(blob["item_index"], indent=2) + "\n")
-    # Merge-safe: new run directory; do not overwrite another run.
-    records = []
-    for s in samples:
-        records.append(
-            {
-                "item_id": s.item_id,
-                "condition": s.condition,
-                "sample_idx": s.sample_idx,
-                "text": s.text,
-                "n_tokens": len(s.tokens),
-                "mean_entropy": (sum(s.entropies) / len(s.entropies)) if s.entropies else None,
-            }
-        )
-    with (out_dir / "samples.jsonl").open("w") as f:
-        for rec in records:
-            f.write(json.dumps(rec) + "\n")
     (out_dir / "per_item.json").write_text(
         json.dumps(_strip_raw_ents(blob["items"]), indent=2) + "\n"
     )
     verdict = blob["summary"]["verdict"]
     (out_dir / "verdict.md").write_text(_verdict_md(blob["summary"]))
     print(json.dumps(verdict, indent=2))
-    print(f"wrote {out_dir}")
+    print(f"wrote {out_dir} new_samples={n_new}")
     return 0 if verdict["decision"] in {"LIVE", "KILL"} else 1
+
+
+def _load_or_create_items(items_path: Path, args: argparse.Namespace, dummy: bool) -> list[ProbeItem]:
+    if items_path.exists():
+        raw = json.loads(items_path.read_text())
+        if isinstance(raw, dict):
+            recs = list(raw.values())
+        else:
+            recs = raw
+        items = [ProbeItem.from_dict(r) for r in recs]
+        print(f"reloaded {len(items)} items from {items_path.name}", flush=True)
+        return items
+    items = load_items(n_math=args.n_math, n_qa=args.n_qa, dummy=dummy)
+    payload = {it.item_id: it.to_dict() for it in items}
+    items_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
+    return items
 
 
 def run_verdict(path: Path) -> int:

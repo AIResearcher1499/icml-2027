@@ -20,6 +20,17 @@ class ProbeItem:
     def to_dict(self) -> dict:
         return asdict(self)
 
+    @classmethod
+    def from_dict(cls, rec: dict) -> ProbeItem:
+        return cls(
+            item_id=rec["item_id"],
+            split=rec["split"],
+            question=rec["question"],
+            gold=rec["gold"],
+            gold_access=rec["gold_access"],
+            distractor_access=rec["distractor_access"],
+        )
+
 
 def dummy_items() -> list[ProbeItem]:
     """Tiny fixtures so the pipeline runs without HuggingFace."""

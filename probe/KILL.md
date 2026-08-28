@@ -48,3 +48,4 @@ alternatively, actually, but, first, then, let's, hmm
 ## Amendments
 
 - 2026-08-28: Hub id is `Qwen/Qwen3-8B` (post-trained; Qwen3 dropped the `-Instruct` suffix). Same checkpoint, thinking off. Not a threshold change.
+- 2026-08-28: Sample log is append-only (`samples.jsonl` + fsync). Re-running the same `--out` skips finished `(item, condition, sample_idx)`. Does not change metrics.
