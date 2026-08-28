@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Full frozen probe on one A6000 (48 GB). Do not retune flags after seeing numbers.
+# Single-GPU fallback. Prefer scripts/run_a6000_2gpu.sh when both cards are free.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 uv sync --extra gpu --extra dev

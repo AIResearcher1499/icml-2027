@@ -51,9 +51,16 @@ def main(argv: list[str] | None = None) -> int:
     v = sub.add_parser("verdict", help="recompute verdict from a saved summary.json")
     v.add_argument("summary", type=Path)
 
+    m = sub.add_parser("merge", help="merge shard run dirs (math/qa) into one verdict")
+    m.add_argument("shards", nargs="+", type=Path)
+    m.add_argument("--out", type=Path, required=True)
+    m.add_argument("--n-samples", type=int, default=None)
+
     args = parser.parse_args(argv)
     if args.cmd == "probe":
         return run_probe(args)
+    if args.cmd == "merge":
+        return run_merge(args)
     return run_verdict(args.summary)
 
 
@@ -145,6 +152,67 @@ def _load_or_create_items(items_path: Path, args: argparse.Namespace, dummy: boo
     payload = {it.item_id: it.to_dict() for it in items}
     items_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
     return items
+
+
+def run_merge(args: argparse.Namespace) -> int:
+    items: list[ProbeItem] = []
+    seen_ids: set[str] = set()
+    samples = []
+    seen_keys: set[tuple[str, str, int]] = set()
+    inferred_n = 0
+    for shard in args.shards:
+        items_path = shard / ITEMS_NAME
+        samples_path = shard / SAMPLES_NAME
+        if not items_path.exists() or not samples_path.exists():
+            print(f"incomplete shard: {shard}", flush=True)
+            return 2
+        raw = json.loads(items_path.read_text())
+        recs = list(raw.values()) if isinstance(raw, dict) else raw
+        for rec in recs:
+            it = ProbeItem.from_dict(rec)
+            if it.item_id in seen_ids:
+                print(f"duplicate item_id {it.item_id} in {shard}", flush=True)
+                return 2
+            seen_ids.add(it.item_id)
+            items.append(it)
+        truncate_torn_tail(samples_path)
+        shard_samples, keys = load_samples(samples_path)
+        for s in shard_samples:
+            if sample_key(s.item_id, s.condition, s.sample_idx) in seen_keys:
+                continue
+            seen_keys.add(sample_key(s.item_id, s.condition, s.sample_idx))
+            samples.append(s)
+            inferred_n = max(inferred_n, s.sample_idx + 1)
+        prog = shard / PROGRESS_NAME
+        if prog.exists():
+            p = json.loads(prog.read_text())
+            if p.get("done", 0) < p.get("total", 0):
+                print(f"warning: shard {shard} incomplete {p}", flush=True)
+
+    n_samples = args.n_samples or inferred_n
+    expected = len(items) * len(CONDITIONS) * n_samples
+    if len(seen_keys) != expected:
+        print(
+            f"merge incomplete: have {len(seen_keys)} samples, expected {expected}",
+            flush=True,
+        )
+        return 2
+
+    out_dir = args.out
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / ITEMS_NAME).write_text(
+        json.dumps({it.item_id: it.to_dict() for it in items}, indent=2, ensure_ascii=False)
+        + "\n"
+    )
+    blob = aggregate(items, samples, n_samples)
+    (out_dir / "summary.json").write_text(json.dumps(blob["summary"], indent=2) + "\n")
+    (out_dir / "per_item.json").write_text(
+        json.dumps(_strip_raw_ents(blob["items"]), indent=2) + "\n"
+    )
+    (out_dir / "verdict.md").write_text(_verdict_md(blob["summary"]))
+    print(json.dumps(blob["summary"]["verdict"], indent=2))
+    print(f"merged {len(args.shards)} shards -> {out_dir}")
+    return 0
 
 
 def run_verdict(path: Path) -> int:

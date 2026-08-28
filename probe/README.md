@@ -26,11 +26,11 @@ uv run accesstrap probe --dummy
 # Tiny real model on CPU/MPS/GPU (not a paper decision).
 uv run accesstrap probe --smoke
 
-# Frozen full probe (one A6000). Re-run the same command to resume.
-uv run accesstrap probe \
-  --model Qwen/Qwen3-8B \
-  --n-samples 32 --n-math 80 --n-qa 80 \
-  --out runs/full
+# Preferred: two A6000s (math | QA), then merge. Re-run to resume shards.
+./scripts/run_a6000_2gpu.sh
+
+# Single GPU fallback:
+./scripts/run_a6000.sh
 
 # Wipe the sample log and start over (keeps items.json).
 uv run accesstrap probe --out runs/full --fresh ...
