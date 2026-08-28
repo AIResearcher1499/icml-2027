@@ -67,6 +67,22 @@ def dummy_sample(item: ProbeItem, condition: str, sample_idx: int) -> Sample:
     return Sample(item.item_id, condition, sample_idx, text, tokens, ents)
 
 
+def _attn_implementation(torch) -> str:
+    """Never request flash_attention_2. It hard-fails on pre-Ampere (Turing T4/2080/RTX 6000).
+
+    Ampere+ (A6000 is sm_86) uses PyTorch SDPA. Older GPUs use eager.
+    """
+    if not torch.cuda.is_available():
+        return "eager"
+    major, minor = torch.cuda.get_device_capability()
+    name = torch.cuda.get_device_name(0)
+    print(f"cuda device={name} capability={major}.{minor}", flush=True)
+    if major < 8:
+        torch.backends.cuda.enable_flash_sdp(False)
+        return "eager"
+    return "sdpa"
+
+
 class HFGenerator:
     def __init__(self, model_name: str, max_new_tokens: int = 512, temperature: float = 0.7):
         import torch
@@ -80,10 +96,13 @@ class HFGenerator:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
         device_map = "auto" if torch.cuda.is_available() else None
+        attn_implementation = _attn_implementation(torch)
+        print(f"loading {model_name} attn={attn_implementation} dtype={dtype}", flush=True)
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
             torch_dtype=dtype,
             device_map=device_map,
+            attn_implementation=attn_implementation,
         )
         if device_map is None:
             device = "mps" if torch.backends.mps.is_available() else "cpu"
