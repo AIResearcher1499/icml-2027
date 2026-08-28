@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 uv sync --extra gpu --extra dev
 uv run accesstrap probe \
-  --model Qwen/Qwen3-8B-Instruct \
+  --model Qwen/Qwen3-8B \
   --n-samples 32 \
   --n-math 80 \
   --n-qa 80 \

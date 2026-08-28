@@ -7,7 +7,7 @@ Source: `docs/06-p1-novelty.md`. This file is the executable spec.
 
 ## Protocol (frozen)
 
-- Model (full): `Qwen/Qwen3-8B-Instruct`, `enable_thinking=False`
+- Model (full): `Qwen/Qwen3-8B`, `enable_thinking=False`
 - Smoke model: `Qwen/Qwen3-0.6B`, same template flags
 - Temperature 0.7, top_p 1.0, max_new_tokens 512, seed 0
 - Full: n=32 samples/item; smoke: n=4
@@ -47,4 +47,4 @@ alternatively, actually, but, first, then, let's, hmm
 
 ## Amendments
 
-(none)
+- 2026-08-28: Hub id is `Qwen/Qwen3-8B` (post-trained; Qwen3 dropped the `-Instruct` suffix). Same checkpoint, thinking off. Not a threshold change.

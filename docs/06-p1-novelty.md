@@ -107,7 +107,7 @@ Code: `literature_review/icml-2027/probe/` (`KILL.md` is the frozen executable s
 
 Do **not** probe “does accuracy drop with context.” That result is already published.
 
-Stack: Qwen3-8B-Instruct (or Qwen3-8B thinking if VRAM allows), temperature 0.6–1.0, n=32 samples/item for a cheap pass@k (full paper uses n=256). One GPU is enough.
+Stack: `Qwen/Qwen3-8B` with `enable_thinking=False` (official Hub id; Qwen3 has no `-Instruct` suffix). One GPU is enough.
 
 **Items (≈100, mixed):**
 - 50 GSM8K/MATH items in the *internally solvable* band (pilot: no-access pass@8 ≥ 0.5). Channel: optional Python interpreter (gold-helpful).

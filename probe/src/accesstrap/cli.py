@@ -19,7 +19,7 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("probe", help="run the frozen 72h probe")
     p.add_argument("--dummy", action="store_true", help="no model; deterministic fakes")
     p.add_argument("--smoke", action="store_true", help="tiny real-model run (0.6B, n=4, 8 items)")
-    p.add_argument("--model", default="Qwen/Qwen3-8B-Instruct")
+    p.add_argument("--model", default="Qwen/Qwen3-8B")
     p.add_argument("--n-samples", type=int, default=32)
     p.add_argument("--n-math", type=int, default=80)
     p.add_argument("--n-qa", type=int, default=80)

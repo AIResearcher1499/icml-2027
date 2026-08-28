@@ -28,7 +28,7 @@ uv run accesstrap probe --smoke
 
 # Frozen full probe (one A6000 is enough).
 uv run accesstrap probe \
-  --model Qwen/Qwen3-8B-Instruct \
+  --model Qwen/Qwen3-8B \
   --n-samples 32 --n-math 80 --n-qa 80
 
 uv run accesstrap verdict runs/<stamp>/summary.json
