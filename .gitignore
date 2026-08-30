@@ -4,6 +4,12 @@ probe/runs/
 probe-p2/.venv/
 probe-p2/.pytest_cache/
 probe-p2/runs/
+probe-p3/.venv/
+probe-p3/.pytest_cache/
+probe-p3/runs/
+probe-s1/.venv/
+probe-s1/.pytest_cache/
+probe-s1/runs/
 **/__pycache__/
 *.pyc
 .DS_Store

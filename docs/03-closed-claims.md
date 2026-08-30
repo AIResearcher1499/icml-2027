@@ -1,6 +1,6 @@
 # Closed claims — do not redo
 
-Last updated: 2026-08-28.
+Last updated: 2026-08-30.
 
 If a probe rediscovers one of these and nothing else, that is a NO-GO, not a paper.
 
@@ -16,13 +16,15 @@ If a probe rediscovers one of these and nothing else, that is a NO-GO, not a pap
 | Tool use that raises accuracy improved reasoning | Tool-Induced Myopia (TIM), ACL 2026, arXiv:2511.10899 | Accuracy +19.3, process quality down. **ACL-shaped**; they did not measure pass@k coverage or fork entropy |
 | Longer CoT / more review is better | Feng et al., *What Characterizes Effective Reasoning?*, arXiv:2509.19284 | Failed-step fraction beats length; they **left faithfulness out of scope** |
 | Extra memory / docs always help | MemTrapBench (Aug 2026); consolidation-from-GT failures; DeR² mode-switch fragility | Catalogs exist; no unified coverage+entropy law across channels |
+| Small transformers need CoT when depth ≲ *c·h*; fit `P(success \| no-CoT)=f(depth/h)` | Physics of LM 2.1 (arXiv:2407.20311); Li et al. (arXiv:2402.12875); Feng et al. (arXiv:2305.15408); Merrill & Sabharwal (arXiv:2310.07923, 2503.03961) | Depth vs reasoning length, CoT vs no-CoT on serial vs mod-add, and a log-depth fit already exist. **Original P3** is closed as a paper. Remaining: serial-vs-parallel necessity that **beats difficulty** on pretrained items (`docs/08-p3-novelty.md`). |
 
 ## Open next to these (the actual gaps)
 
 - TIM did not measure **solution-set coverage** or **internal fork entropy** when a tool is attached.
 - Flexibility Trap did not treat **external text** (tools, memory, retrieved passages) as a flexibility.
 - *Weight of Silence* is chess + latent vectors, not verbal CoT across SFT → RL checkpoints. CIR-SR already shows outcome RLVR need not raise (and often lowers) prefix-truncation CIR on ReasoningGym; JET already shows LRM 50% **prefix** truncate keeps most originally-correct answers. Original P2 (“after RL, traces are epiphenomenal / 50% truncate hurts SFT more”) is closed; the remaining opening is empty-trace vs prefix dissociation on a matched SFT-CoT → GRPO path (`docs/07-p2-novelty.md`).
-- 80/20 is CoT-on-math. Tool-decision tokens and memory-write tokens are untested.
+- 80/20 is CoT-on-math. Tool-decision tokens and memory-write tokens are untested. P4 stays dead with P1.
+- Physics of LM / Li / Feng / Merrill already own “small transformers need depth or CoT as *h* grows.” Original P3 is closed; the remaining opening is a serial-vs-parallel law that transfers to pretrained CoT-uplift **better than difficulty** (`docs/08-p3-novelty.md`). Not locked.
 - BonaFide says metrics fail. The remaining move is **intervention**, not a new detector.
 
 ## Do not start
@@ -31,3 +33,7 @@ If a probe rediscovers one of these and nothing else, that is a NO-GO, not a pap
 - Another unfaithful-CoT classifier
 - Another agent-memory architecture leaderboard
 - Another GRPO math recipe
+- Another Physics of LM / Li et al. depth-vs-horizon plot without a parallel control **and** a transfer that beats difficulty
+- Pretrained “CoT as serial-depth bypass” (Kurtulush, arXiv:2608.09942, Jun 2026) — parks sharpened P3
+
+See `docs/09-rescan-2026-08-30.md` for the post-KILL idea list.

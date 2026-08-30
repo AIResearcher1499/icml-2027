@@ -1,6 +1,6 @@
 # Candidate papers (unlocked)
 
-Last updated: 2026-08-28.
+Last updated: 2026-08-30.
 
 Four stems. Rank is a probe order, not a lock. Run kill probes **before** GRPO. Lock at most one. ICML thin-slicing policy: do not submit two close variants.
 
@@ -56,17 +56,21 @@ Default stack: Qwen3-8B (base and/or instruct), vLLM, Unsloth GRPO if needed, 2�
 
 ## P3 — When is a language channel necessary?
 
-**Probe order:** 3 (backup if P1 and P2 die).
+**Sharpened claim (2026-08-30 novelty sweep):** see `docs/08-p3-novelty.md`. Original wording is closed as a paper. Backup only; not locked. Frozen 72h spec: `probe/KILL-p3.md`. Dummy: `probe-p3/`.
 
-**Assumption.** CoT always helps; longer is better.
+**Probe order:** 3 (backup if P2 dies). Do not start GPU while P2 is on the A6000s.
 
-**Claim.** On synthetic tasks with horizon *h* and branching *b*, models without a verbal channel fail when network depth ≲ *c·h*. CoT helps **exactly** in that regime. Fit `P(success | no-CoT) = f(depth / h)` on 20M–300M transformers, then test whether 0.6B–8B “overthinking” items are those where weights already suffice (CoT is leftover regularizer).
+**Assumption.** CoT always helps; longer is better; overthinking is a length-control problem on easy items.
 
-**Why it is not *Physics of Language Models*.** Need a **transferable curve**, not “small models use hidden reasoning on GSM-like tasks.”
+**Claim.** A verbal channel is a **serial-depth prosthesis**, not a general thinking bonus. At matched sequence length, no-CoT accuracy collapses when *serial* horizon *h* exceeds the one-pass depth budget; CoT restores that cell; a length-matched **parallel** control does not collapse. Transfer (paper, not 72h): that frozen (*h*, *L*) predictor ranks 0.6B–8B CoT-uplift better than difficulty.
 
-**Fit.** Perfect for 2×A6000: many small pretrains. Less NLP-object, more ML-science. Weaker comparative advantage, cleaner ICML voice.
+**Why it is not *Physics of Language Models*.** They train *with* CoT and show depth is still needed for *planning* on iGSM. We forbid iGSM. Trivial-plan serial product + parallel control.
 
-**One-week kill probe.** Forced-scratchpad synthetic (copy-with-offset or multi-step modular arithmetic). 3 sizes × with/without CoT. If no-CoT never breaks as *h* grows → **kill P3**.
+**Why it is not Li 2024.** They already have CoT vs no-CoT on serial vs mod-add. The 72h probe is a GO/NO-GO that our stack can produce the dissociation. If that plot is all we have, we do not lock.
+
+**Fit.** Tiny GPT-2 on 2×A6000 after P2 frees the pair. Less NLP-object, more ML-science. Weaker comparative advantage, cleaner ICML voice.
+
+**72-hour kill probe (no 20M–300M, no 0.6B).** Iterated mod-product (serial) vs mod-sum (parallel), *h* ∈ {4,8,16}, *L* ∈ {2,4,8}, forced scratchpad vs direct. Live/kill frozen in `probe/KILL-p3.md`. Dummy: `uv run scratchdepth probe --dummy`. If no-CoT never breaks as *h* grows on the serial arm, or the parallel arm collapses too → **kill P3**.
 
 ---
 

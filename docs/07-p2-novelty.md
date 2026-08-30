@@ -1,7 +1,9 @@
 # P2 novelty sweep (Weights over traces after RL)
 
 Sweep date: 2026-08-29.
-Hedge stem. **Original P2 is too close to 2026 prior work.** A sharpened claim remains open. Do not run the 72h probe against the original wording. Do not lock P2 in `docs/05-decision.md`.
+**Probe KILL 2026-08-30** — `docs/p2-probe-result-2026-08-30.md`. This file is the design note, not the result. Do not retune the live/kill lines below.
+
+Hedge stem. **Original P2 is too close to 2026 prior work.** The sharpened claim was open pending the 72h probe and is now **closed by that probe**.
 
 This sweep is full-text on the kill-threats listed in `docs/04-proposals.md` plus 2025–2026 neighbours (internalization, no-think, prefix truncation, CoT necessity). It does not copy numbers or verdicts from other repos or session memory.
 
@@ -10,7 +12,7 @@ This sweep is full-text on the kill-threats listed in `docs/04-proposals.md` plu
 | Version | Status |
 |---|---|
 | Original P2 (“after RLVR, CoT is no longer where the model computes; 50% truncate / paraphrase / mid-trace noise hurts SFT more than GRPO”) | **Closed as a paper.** Incremental over CIR-SR (prefix-truncation CIR drops under outcome RL) + JET (LRMs keep most accuracy after 50% prefix truncate) + Weight of Silence (weights-over-scratchpad after RL, chess/latent). |
-| Sharpened P2 (below) | **Open, contingent on the 72h probe.** Kill if the probe only rediscovers prefix-robustness (JET) or a two-point CIR drop (CIR-SR). |
+| Sharpened P2 (below) | **Closed by the 72h probe** (`docs/p2-probe-result-2026-08-30.md`). Capability failed. |
 
 ### Sharpened one-sentence claim
 

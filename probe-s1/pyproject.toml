@@ -1,0 +1,33 @@
+[project]
+name = "committrap"
+version = "0.1.0"
+description = "72h kill probe for S1 (commitment trap). Dummy/smoke never lock."
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+hf = [
+    "datasets>=3.0.0",
+]
+gpu = [
+    "torch>=2.4.0",
+    "transformers>=4.51.0",
+    "accelerate>=1.0.0",
+    "datasets>=3.0.0",
+]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[project.scripts]
+committrap = "committrap.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
