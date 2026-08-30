@@ -1,6 +1,9 @@
 probe/.venv/
 probe/.pytest_cache/
 probe/runs/
+probe-p2/.venv/
+probe-p2/.pytest_cache/
+probe-p2/runs/
 **/__pycache__/
 *.pyc
 .DS_Store

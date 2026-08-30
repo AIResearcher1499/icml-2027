@@ -50,3 +50,4 @@ alternatively, actually, but, first, then, let's, hmm
 - 2026-08-28: Hub id is `Qwen/Qwen3-8B` (post-trained; Qwen3 dropped the `-Instruct` suffix). Same checkpoint, thinking off. Not a threshold change.
 - 2026-08-28: Sample log is append-only (`samples.jsonl` + fsync). Re-running the same `--out` skips finished `(item, condition, sample_idx)`. Does not change metrics.
 - 2026-08-29: Two-GPU split is math vs QA shards then `accesstrap merge`. Verdict is computed only on the merged pool. Same thresholds.
+- 2026-08-30: Merged full probe recorded **KILL**. Numbers: `docs/p1-probe-result-2026-08-30.md`. Not a threshold change. Do not re-score.

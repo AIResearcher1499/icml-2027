@@ -10,7 +10,7 @@ If a probe rediscovers one of these and nothing else, that is a NO-GO, not a pap
 | RLVR should train every token | Beyond the 80/20 Rule, NeurIPS 2025, arXiv:2506.01939 | Top ~20% entropy tokens carry the gradient |
 | Latent scratchpad is read at inference (chess) | *The Weight of Silence*, arXiv:2607.20952 | Noise on latent thoughts does not change play; gain is in the weights |
 | RLVR expands pass@k / empirical support | Limit-of-RLVR; *The Invisible Leash*, arXiv:2507.14843 | pass@1 up, large-k coverage down |
-| Outcome reward makes traces causally important | CIR/SR, arXiv:2604.22074 | Correct answers with unused or insufficient traces |
+| Outcome reward makes traces causally important | CIR/SR, arXiv:2604.22074 | Correct answers with unused or insufficient traces. **Original P2** (“after RL, CoT is epiphenomenal; 50% truncate hurts SFT more”) is this plus JET (arXiv:2509.23392) plus Weight of Silence. Closed as a paper. |
 | Faithfulness *metrics* measure faithfulness | BonaFide, arXiv:2605.25052 | Near chance; no transfer step ↔ CoT |
 | Unfaithfulness is one regime | *Two Regimes…*, arXiv:2607.23458 | 69% of labeled unfaithfulness is on **wrong** answers; detectors at chance there |
 | Tool use that raises accuracy improved reasoning | Tool-Induced Myopia (TIM), ACL 2026, arXiv:2511.10899 | Accuracy +19.3, process quality down. **ACL-shaped**; they did not measure pass@k coverage or fork entropy |
@@ -21,7 +21,7 @@ If a probe rediscovers one of these and nothing else, that is a NO-GO, not a pap
 
 - TIM did not measure **solution-set coverage** or **internal fork entropy** when a tool is attached.
 - Flexibility Trap did not treat **external text** (tools, memory, retrieved passages) as a flexibility.
-- *Weight of Silence* is chess + latent vectors, not verbal CoT across SFT → RL checkpoints.
+- *Weight of Silence* is chess + latent vectors, not verbal CoT across SFT → RL checkpoints. CIR-SR already shows outcome RLVR need not raise (and often lowers) prefix-truncation CIR on ReasoningGym; JET already shows LRM 50% **prefix** truncate keeps most originally-correct answers. Original P2 (“after RL, traces are epiphenomenal / 50% truncate hurts SFT more”) is closed; the remaining opening is empty-trace vs prefix dissociation on a matched SFT-CoT → GRPO path (`docs/07-p2-novelty.md`).
 - 80/20 is CoT-on-math. Tool-decision tokens and memory-write tokens are untested.
 - BonaFide says metrics fail. The remaining move is **intervention**, not a new detector.
 

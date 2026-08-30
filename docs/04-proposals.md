@@ -32,6 +32,8 @@ Default stack: Qwen3-8B (base and/or instruct), vLLM, Unsloth GRPO if needed, 2Ã
 
 ## P2 â€” Weights over traces after RL
 
+**Sharpened claim (2026-08-29 novelty sweep):** see `docs/07-p2-novelty.md`. Original wording is closed as a paper. Hedge only; not locked. Frozen 72h spec: `probe/KILL-p2.md`. Dummy: `probe-p2/`.
+
 **Probe order:** 2.
 
 **Assumption.** After RLVR, the chain of thought is where the model computes. Truncating or noising it must collapse accuracy.

@@ -1,7 +1,9 @@
 # P1 novelty sweep (Access Trap)
 
 Sweep date: 2026-08-28.
-Direction chosen. **Original P1 is too close to 2026 prior work.** A sharpened claim remains open. Do not run the 72h probe against the original wording.
+**Probe KILL 2026-08-30** — `docs/p1-probe-result-2026-08-30.md`. This file is the design note, not the result. Do not retune the live/kill lines below.
+
+Direction chosen 2026-08-28. **Original P1 is too close to 2026 prior work.** The sharpened claim was open pending the 72h probe and is now **closed by that probe**.
 
 ## Verdict
 
